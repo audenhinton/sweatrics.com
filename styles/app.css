@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+
+  input[type="text"], input[type="password"] {
+    @apply w-full p-3 px-5 rounded-md bg-slate-50 border border-slate-200 transition-all text-slate-600 !important;
+  }
+
+  input[type="text"]:hover, input[type="password"]:hover {
+    @apply border-slate-300 transition-all bg-white !important;
+  }
+
+  input[type="text"]:focus, input[type="password"]:focus {
+    @apply border-slate-700 transition-all bg-white outline-none !important;
+  }
+
+  button {
+    @apply w-full p-3 px-5 rounded-md bg-red-700 hover:bg-red-800 transition-all font-medium text-white !important;
+  }
+
+  .card {
+    @apply bg-white rounded p-8 shadow-sm !important;
+  }
+
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active{
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+}
