@@ -56,6 +56,7 @@ export default function Blah({ workouts, className }) {
           <XAxis dataKey="key" stroke="#94a3b8" />
           {/* <YAxis tickFormatter={tick => (tick / 1000) +  " kj"} stroke="#ffffff"/> */}
           <Tooltip />
+
           <Area
             type="monotone"
             dataKey="total"

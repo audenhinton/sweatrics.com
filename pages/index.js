@@ -7,10 +7,15 @@ var numeral = require('numeral')
 const Blah = dynamic(() => import('../components/line'), { ssr: false })
 const Pie = dynamic(() => import('../components/pie'), { ssr: false })
 
+import Loading from '../components/loading'
+import http from '../util/http'
+
+
 export default function Home({ auth, setAuth }) {
 
   const [workouts, setWorkouts] = useState([])
   const [user, setUser] = useState({})
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     getUser()
@@ -19,23 +24,21 @@ export default function Home({ auth, setAuth }) {
 
   const getWorkouts = () => {
 
-    fetch(`/api/workouts?peloton_user_id=${getCookie('peloton_user_id')}`, {
-      method: 'GET',
-    }).then(res => res.json())
-      .then(res => {
+    setLoading(true)
 
-        setWorkouts(res.filter((item) => {
-          return item.status == "COMPLETE"
-        }))
+    http.get(`/api/workouts?peloton_user_id=${getCookie('peloton_user_id')}`).then(res => {
 
-        res.forEach(item => {
-          if (item.status != "COMPLETE") {
-            console.log(item.status)
-          }
-        })
+      setWorkouts(res.filter((item) => {
+        return item.status == "COMPLETE"
+      }))
 
+      setLoading(false)
+
+    })
+      .catch(err => {
+        console.log(err)
+        setLoading(false)
       })
-      .catch(err => console.log(err))
 
   }
 
@@ -85,6 +88,10 @@ export default function Home({ auth, setAuth }) {
     max_distance = getDistance(max_distance)
   }
 
+  const total_distance = _.sumBy(workouts, item => {
+    return getDistance(item)
+  })
+
   return (
     <div className="prose prose-md max-w-none grid grid-cols-4 gap-5 bg-slate-50 w-full p-5">
 
@@ -96,12 +103,13 @@ export default function Home({ auth, setAuth }) {
 
           <p className="text-2xl">
             Hello, {user.first_name}!
+            <a onClick={e => signOut()} className="text-sm block">Sign out </a>
           </p>
 
         </div>
 
         <div className="flex-none">
-          <button onClick={e => signOut()} className="text-slate-600 bg-slate-100 rounded-md p-3 px-5 border border-slate-200">Sign out <i className="bi bi-box-arrow-in-right opacity-50"></i></button>
+          
         </div>
 
       </div>
@@ -120,7 +128,7 @@ export default function Home({ auth, setAuth }) {
           Total distance
         </SLabel>
         <SMetric>
-          {numeral(((total_time / 3600) * avg_velocity)).format('0,0.00')} miles
+          {numeral(total_distance).format('0,0.00')} miles
         </SMetric>
       </div>
 
@@ -148,6 +156,15 @@ export default function Home({ auth, setAuth }) {
         </SLabel>
         <SMetric>
           {numeral((total_output / 1000) / 2.3).format('0,0')} kcal
+        </SMetric>
+      </div>
+
+      <div className="card col-span-4 md:col-span-2 xl:col-span-1">
+        <SLabel>
+          Calculated fat burned &nbsp; <a href="https://www.nal.usda.gov/legacy/fnic/i-want-lose-pound-weight-how-many-calories-do-i-need-burn" target="_BLANK"><i className="bi bi-info-circle-fill text-slate-400 hover:text-slate-700 transition-all"></i></a>
+        </SLabel>
+        <SMetric>
+          {numeral(((total_output / 1000) / 2.3) / 3500).format('0,0')} lbs
         </SMetric>
       </div>
 
@@ -190,7 +207,7 @@ export default function Home({ auth, setAuth }) {
       <Blah workouts={workouts} className="col-span-4 rounded-lg shadow-md bg-white p-8" />
       {/* <Pie workouts={workouts} className="col-span-4 rounded-lg shadow-md bg-white p-8" /> */}
 
-
+      {loading && <Loading text="Crunching abs (and numbers)" />}
 
     </div>
   )
@@ -208,4 +225,8 @@ const SMetric = (props) => (
     {props.children}
   </p>
 )
+
+
+
+
 

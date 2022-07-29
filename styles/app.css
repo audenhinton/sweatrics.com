@@ -24,6 +24,10 @@
     @apply bg-white rounded p-8 shadow-sm !important;
   }
 
+  a, .link {
+    @apply cursor-pointer font-medium text-red-700 hover:text-red-800 transition-all no-underline hover:underline !important;
+  }
+
 }
 
 input:-webkit-autofill,

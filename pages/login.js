@@ -2,24 +2,26 @@ import { useState } from 'react'
 import { setCookie } from 'cookies-next';
 import Icon from '../public/icon.svg'
 
+import http from '../util/http';
+import Loading from '../components/loading';
+
 export default function Login({ setAuth }) {
 
     const [username, setUsername] = useState()
     const [password, setPassword] = useState()
+    const [loading, setLoading] = useState(false)
 
     const connect = async (e) => {
         e.preventDefault()
 
-        fetch('/api/proxy?url=https://api.onepeloton.com/auth/login', {
-            method: 'POST',
-            body: JSON.stringify({
-                "username_or_email": username,
-                "password": password
-            })
-        }).then(res => res.json())
-            .then(res => {
+        setLoading(true)
 
-                console.log(res)
+        http.post('/api/proxy?url=https://api.onepeloton.com/auth/login', {
+            "username_or_email": username,
+            "password": password
+        }).then(res => {
+
+                setLoading(false)
 
                 if (!res.error_code) {
                     setCookie('peloton_session_id', res.session_id);
@@ -33,7 +35,10 @@ export default function Login({ setAuth }) {
                 }
 
             })
-            .catch(err => console.log(err))
+            .catch(err => {
+                setLoading(false)
+                console.log(err)
+            })
 
     }
 
@@ -73,7 +78,7 @@ export default function Login({ setAuth }) {
 
             </div>
 
-
+            {loading && <Loading text="Connecting to Peloton" />}
 
         </div>
     )
